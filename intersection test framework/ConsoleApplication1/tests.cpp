@@ -49,7 +49,7 @@ void RunTests() {
 
 	RunRaySphereTests();
 	RunRayPolyTests();
-	//RunRayCubeTests();
+	RunRayCubeTests();
 	RunYourTests();
 	RunGradingTests();
 

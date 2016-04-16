@@ -11,6 +11,7 @@
 */
 
 #include "stubs.h"
+#include <limits>
 
 using namespace glm;
 
@@ -146,9 +147,69 @@ double Test_RayPolyIntersect(const vec4& P0, const vec4& V0, const vec4& p1, con
 	return -1.0f;
 }
 
+
+float maximum( float a, float b, float c )
+{
+   float max = ( a < b ) ? b : a;
+   return ( ( max < c ) ? c : max );
+}
+float minimum( float a, float b, float c )
+{	
+   float max = ( a > b ) ? b : a;
+   return ( ( max > c ) ? c : max );
+}
 double Test_RayCubeIntersect(const vec4& P0, const vec4& V0, const mat4& T) {
 	// TODO fill this in.
 	// See the documentation of this function in stubs.h.
+
+	//Invert T matrix;
+	mat4 inverseT = inverse(T);
+	
+	//Transform ray with inverse matrix
+	vec4 rayOrigin    = inverseT * P0;    //Replaces P0
+	vec4 rayDirection = inverseT * V0; //Replaces V0
+		
+	//rayOrigin    = T * P0;    //Replaces P0
+	//rayDirection = T * V0; //Replaces V0
+	float signOfx;
+	float signOfy;
+	float signOfz;
+
+	if (rayOrigin.x <= 0) signOfx = 1; else signOfx = -1;
+	if (rayOrigin.y <= 0) signOfy = 1; else signOfy = -1;
+	if (rayOrigin.z <= 0) signOfz = 1; else signOfz = -1;
+
+
+	float nearx = (signOfx * -0.5 - rayOrigin.x )/(rayDirection.x);
+	float neary = (signOfy * -0.5 - rayOrigin.y )/(rayDirection.y);
+	float nearz = (signOfz * -0.5 - rayOrigin.z )/(rayDirection.z);
+
+	float farx  = (signOfx * +0.5 - rayOrigin.x )/(rayDirection.x);
+	float fary  = (signOfy * +0.5 - rayOrigin.y )/(rayDirection.y);
+	float farz  = (signOfz * +0.5 - rayOrigin.z )/(rayDirection.z);
+
+
+	
+	if (rayDirection.x == 0 && abs(rayOrigin.x) <= 0.5) {
+		nearx = INT_MIN;
+		farx  = INT_MAX;
+	}
+
+	if (rayDirection.y == 0 && abs(rayOrigin.y) <= 0.5) {
+		neary = INT_MIN;
+		fary  = INT_MAX;
+	}
+
+	if (rayDirection.z == 0 && abs(rayOrigin.y) <= 0.5) {
+		nearz = INT_MIN;
+		farz  = INT_MAX;
+	}
+
+	float near = maximum(nearx, neary, nearz);
+	float far  = minimum(farx , fary , farz );
+
+	if (near <= far)
+		return near;
 
 	return -1;
 }
