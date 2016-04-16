@@ -49,7 +49,7 @@ void RunTests() {
 
 	RunRaySphereTests();
 	RunRayPolyTests();
-	RunRayCubeTests();
+	//RunRayCubeTests();
 	RunYourTests();
 	RunGradingTests();
 
@@ -124,7 +124,8 @@ void RunRaySphereTests() {
 	RunTest(
 		"Looking back",
 		Test_RaySphereIntersect(vec4(ZNEGTEN_VECTOR, 1.0f), vec4(POSZ_VECTOR, 0.0f), BACK5_MATRIX),
-		4.0); // TODO change this to the right number 
+		4.0); 
+	// TODO change this to the right number 
 		//I think the number should be "4.0"
 
 	RunTest(
@@ -167,7 +168,7 @@ void RunRayPolyTests() {
 	RunTest(
 		"And turns",
 		Test_RayPolyIntersect(vec4(HALFX_VECTOR, 1.0f), vec4(NEGZ_VECTOR, 0.0f), POINT_N2N10, POINT_2N10, POINT_010, BACK5ANDTURN_MATRIX),
-		TEN_KAZILLION); // TODO change this to the right number
+		5.5); // TODO change this to the right number
 }
 
 void RunRayCubeTests() {
@@ -199,15 +200,73 @@ void RunRayCubeTests() {
 	RunTest(
 		"Strafing the cube",
 		Test_RayCubeIntersect(vec4(NEGFIVEOFIVE_VECTOR, 1.0f), vec4(POSXNEGZ_NORM_VECTOR, 0.0f), IDENTITY_MATRIX),
-		TEN_KAZILLION); // TODO change this to the right number
+		6.36); // TODO change this to the right number
 }
 
 void RunYourTests() {
 	// It can be very useful to put tests of your own here. The unit tests above do NOT test everything!
+	const vec4 SPHERE0P0(0,-1,-4,1);
+	const vec4 SPHERE0V0(0,1,0,0);
+	const mat4 SPHERE0TRANS(vec4(2,0,0,0), vec4(0,1,-1.732,0), vec4(0,1.732,1,0), vec4(0,3,-3,1));
+	RunTest(
+		"TESTME SPHERE 0",
+		Test_RaySphereIntersect(SPHERE0P0, SPHERE0V0, SPHERE0TRANS),
+		4 - sqrt(3.0));
+
+	const vec4 SPHERE1P0(1,0,3,1);
+	const vec4 SPHERE1V0(0,0,-1,0);
+	const mat4 SPHERE1TRANS(vec4(2,0,0,0), vec4(0,1,0,0), vec4(0,0,1,0), vec4(0,0,0,1));
+	RunTest(
+		"TESTME SPHERE 1",
+		Test_RaySphereIntersect(SPHERE1P0, SPHERE1V0, SPHERE1TRANS),
+		3 - sqrt(0.75));
+
+
+	const vec4 POLY0P[3] = {
+		vec4(0,2,-2,1),
+		vec4(-3,-2,2,1),
+		vec4(3,-2,2,1)
+	};
+
+
+	const vec4 POLY0P0(1,-1,2,1);
+	const vec4 POLY0V0(0,0,-1,0);
+
+	RunTest(
+		"TESTME POLY 0",
+		Test_RayPolyIntersect(POLY0P0, POLY0V0, POLY0P[0], POLY0P[1], POLY0P[2], IDENTITY_MATRIX),
+		1.0);
+
+	const mat4 POLY1TRANS(vec4(-3,0,0,0),   vec4(0,2,0,0),   vec4(0,0,-2,0),   vec4(0,0,0,1));
+
+	RunTest(
+		"TESTME POLY 1",
+		Test_RayPolyIntersect(POLY0P0, POLY0V0, POLY0P[0], POLY0P[1], POLY0P[2], POLY1TRANS),
+		3.0);
+
+
+	const vec4 CUBE0P0(1,1,1,1);
+	const vec4 CUBE0V0(-0.5773,-0.5773,-0.5773,0);
+
+	RunTest(
+		"TESTME CUBE 0",
+		Test_RayCubeIntersect(CUBE0P0, CUBE0V0, IDENTITY_MATRIX),
+		sqrt(3.0) - sqrt(0.75));
+
+	const mat4 CUBE1TRANS(vec4(0.7071,0.4082,0.5774,0), vec4(0,0.8165,-0.5774,0),  vec4(-0.7071,0.4082,0.5774,0), vec4(0,0,0,1));
+
+	const vec4 CUBE1P0(0,0,1,1);
+	const vec4 CUBE1V0(0,0,-1,0);
+
+	RunTest(
+		"TESTME CUBE 1",
+		Test_RayCubeIntersect(CUBE1P0, CUBE1V0, CUBE1TRANS),
+		1 - sqrt(0.75));
 }
 
 void RunGradingTests() {
 	// Leave this function alone; we'll put stuff in it for grading.
+	
 }
 
 void ReportTest(std::string name, bool result) {

@@ -70,11 +70,80 @@ double Test_RaySphereIntersect(const vec4& P0, const vec4& V0, const mat4& T) {
 	return -1;
 }
 
+// Tries to find the intersection of a ray and a triangle.
+// This is just like the above function, but it intersects the ray with a
+// triangle instead. The parameters p1, p2, and p3 specify the three
+// points of the triangle, in object space.
+
 double Test_RayPolyIntersect(const vec4& P0, const vec4& V0, const vec4& p1, const vec4& p2, const vec4& p3, const mat4& T) {
 	// TODO fill this in.
 	// See the documentation of this function in stubs.h.
 
-	return -1;
+	// Tries to find the intersection of a ray and a triangle.
+	// This is just like the above function, but it intersects the ray with a
+	// triangle instead. The parameters p1, p2, and p3 specify the three
+	// points of the triangle, in object space.
+
+	vec3 temp = vec3(P0.x,P0.y,P0.z);
+	vec3 rayOrig = vec3((inverse(T) * vec4(temp,1))); //transform E
+	//make c* matrix to multiply D with
+	mat4 cStar = mat4(vec4(1.0f,1.0f,1.0f,0.0f),vec4(1.0f,1.0f,1.0f,0.0f),vec4(1.0f,1.0f,1.0f,0.0f),vec4(1.0f,1.0f,1.0f,1.0f)); 
+
+	temp = vec3(V0.x,V0.y,V0.z);
+	vec3 rayDir = vec3(inverse(matrixCompMult(T,cStar)) * vec4(temp,0)); // put the ray into world space
+	vec3 v1 = vec3(p3.x - p1.x, p3.y - p1.y, p3.z - p1.z); //prep for Normal vector calc
+	vec3 v2 = vec3(p3.x - p2.x, p3.y - p2.y, p3.z - p2.z);
+	vec3 normal = cross(v1,v2); //calculate the normal vector
+	vec3 pt = rayOrig + rayDir; //P in the notes
+	if (dot(normal, pt - rayOrig) == 0.0f) //t would be undefined
+		return -1.0f;
+	vec3 dotVec = vec3(p1.x - rayOrig.x, p1.y - rayOrig.y, p1.z - rayOrig.z);
+	float t = dot(normal, dotVec)/dot(normal, pt - rayOrig); //Find the value for t
+	if (t  < 0.0f) //the ray is parallel to the plane
+		return -1;
+	vec3 R = rayOrig + t*(pt - rayOrig);
+
+
+	//is the point in the tri??
+#pragma region Triangles!!!!
+	mat3 R01 = mat3(p1.y, p1.z, 1.0f, p2.y, p2.z, 1.0F, p3.y, p3.z, 1.0f);
+	mat3 R02 = mat3(p1.z, p1.x, 1.0f, p2.z, p2.x, 1.0F, p3.z, p3.x, 1.0f);
+	mat3 R03 = mat3(p1.x, p1.y, 1.0f, p2.x, p2.y, 1.0F, p3.x, p3.y, 1.0f);
+		 
+	mat3 R11 = mat3(R.y, R.z, 1.0f, p2.y, p2.z, 1.0F, p3.y, p3.z, 1.0f);
+	mat3 R12 = mat3(R.z, R.x, 1.0f, p2.z, p2.x, 1.0F, p3.z, p3.x, 1.0f);
+	mat3 R13 = mat3(R.x, R.y, 1.0f, p2.x, p2.y, 1.0F, p3.x, p3.y, 1.0f);
+		 					   									
+	mat3 R21 = mat3(R.y, R.z, 1.0f, p3.y, p3.z, 1.0F, p1.y, p1.z, 1.0f);
+	mat3 R22 = mat3(R.z, R.x, 1.0f, p3.z, p3.x, 1.0F, p1.z, p1.x, 1.0f);
+	mat3 R23 = mat3(R.x, R.y, 1.0f, p3.x, p3.y, 1.0F, p1.x, p1.y, 1.0f);
+		 					   									
+	mat3 R31 = mat3(R.y, R.z, 1.0f, p1.y, p1.z, 1.0f, p2.y, p2.z, 1.0f);
+	mat3 R32 = mat3(R.z, R.x, 1.0f, p1.z, p1.x, 1.0f, p2.z, p2.x, 1.0f);
+	mat3 R33 = mat3(R.x, R.y, 1.0f, p1.x, p1.y, 1.0f, p2.x, p2.y, 1.0f);
+#pragma endregion 
+
+	//Rule of Sarrus
+	float tri = determinant(R01) * determinant(R01) + determinant(R02)*determinant(R02) + determinant(R03)*determinant(R03);
+	float tri1 = determinant(R11) * determinant(R11) + determinant(R12)*determinant(R12) + determinant(R13)*determinant(R13);
+	float tri2 = determinant(R21) * determinant(R21) + determinant(R22)*determinant(R22) + determinant(R23)*determinant(R23);
+	float tri3 = determinant(R31) * determinant(R31) + determinant(R32)*determinant(R32) + determinant(R33)*determinant(R33);
+
+	float area =  sqrt(tri);
+	float area1 = sqrt(tri1)/area;
+	float area2 = sqrt(tri2)/area;
+	float area3 = sqrt(tri3)/area;
+	float res = area1 + area2 + area3;
+
+	//check to see if its in bounds
+	//
+	if (res <= 1.0f && res >= 1.0f){
+		return t;
+	}
+	else{
+		return -1.0f;
+	}
+	return -1.0f;
 }
 
 double Test_RayCubeIntersect(const vec4& P0, const vec4& V0, const mat4& T) {
