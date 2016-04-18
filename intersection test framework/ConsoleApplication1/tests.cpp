@@ -8,6 +8,7 @@
   modifications by Cory since joining the faculty of Grove City College.
   
   Last revised 4/15/2015
+    Code added by: Andrew Pier, Sam Gill, Garth Brooks
 */
 
 #include "tests.h"
